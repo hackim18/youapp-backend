@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../users/schemas/user.schema';
+import { RegisterResponseDto } from './dto/register-response.dto';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -29,7 +30,7 @@ describe('AuthService', () => {
     jest.clearAllMocks();
   });
 
-  it('register should create a user', async () => {
+  it('register should create a user and return response payload', async () => {
     const dto: RegisterDto = { email: 'a@example.com', username: 'user', password: 'pass123' };
     const user = { id: '1', ...dto } as unknown as User;
     usersServiceMock.createUser = jest.fn().mockResolvedValue(user);
@@ -37,7 +38,11 @@ describe('AuthService', () => {
     const result = await service.register(dto);
 
     expect(usersServiceMock.createUser).toHaveBeenCalledWith(dto);
-    expect(result).toEqual(user);
+    const expected: RegisterResponseDto = {
+      message: 'User registered successfully',
+      data: { id: '1', email: dto.email, username: dto.username },
+    };
+    expect(result).toEqual(expected);
   });
 
   it('login should return access token', async () => {

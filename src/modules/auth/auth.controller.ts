@@ -3,9 +3,8 @@ import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { User } from '../users/schemas/user.schema';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { UserResponseDto } from './dto/user-response.dto';
+import { RegisterResponseDto } from './dto/register-response.dto';
 
 @ApiTags('Auth')
 @Controller('api')
@@ -14,8 +13,8 @@ export class AuthController {
 
   @Post('register')
   @ApiBody({ type: RegisterDto })
-  @ApiOkResponse({ type: UserResponseDto, description: 'Registered user' })
-  register(@Body() payload: RegisterDto): Promise<User> {
+  @ApiOkResponse({ type: RegisterResponseDto, description: 'Registered user' })
+  register(@Body() payload: RegisterDto): Promise<RegisterResponseDto> {
     return this.authService.register(payload);
   }
 
