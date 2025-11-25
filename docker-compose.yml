@@ -1,0 +1,38 @@
+﻿version: "3.9"
+
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: mongodb://mongo:27017/youapp
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_QUEUE: youapp.messages
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+volumes:
+  mongo_data:
