@@ -6,6 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { User } from '../users/schemas/user.schema';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { LoginDataDto, LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -55,7 +56,7 @@ export class AuthService {
     };
   }
 
-  async login(_payload: LoginDto): Promise<{ accessToken: string }> {
+  async login(_payload: LoginDto): Promise<LoginResponseDto> {
     const identifier = _payload.emailOrUsername.trim();
     const emailCandidate = identifier.includes('@')
       ? identifier.toLowerCase()
@@ -76,7 +77,12 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
+    const data: LoginDataDto = { accessToken };
+
+    return {
+      message: 'Login successful',
+      data,
+    };
   }
 
   async validateUser(

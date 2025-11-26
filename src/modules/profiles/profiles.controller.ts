@@ -18,7 +18,7 @@ import { GetUser } from '../../common/decorators/get-user.decorator';
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { Profile } from './schemas/profile.schema';
+import { ProfileNullableResponseDto, ProfileResponseDto } from './dto/profile-response.dto';
 
 @ApiTags('Profiles')
 @ApiBearerAuth()
@@ -29,51 +29,71 @@ export class ProfilesController {
   @UseGuards(JwtAuthGuard)
   @Post('createProfile')
   @ApiBody({ type: CreateProfileDto })
-  @ApiOkResponse({ type: Profile, description: 'Created profile' })
-  createProfile(
+  @ApiOkResponse({ type: ProfileResponseDto, description: 'Created profile' })
+  async createProfile(
     @GetUser('sub') userId: string,
     @Body() payload: CreateProfileDto,
-  ): Promise<Profile> {
+  ): Promise<ProfileResponseDto> {
     if (!userId) {
       throw new UnauthorizedException('Invalid token payload');
     }
 
-    return this.profilesService.create({
+    const profile = await this.profilesService.create({
       ...payload,
       userId,
       interests: payload.interests ?? [],
     });
+
+    return {
+      message: 'Profile created successfully',
+      data: profile,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('getProfile')
   @ApiOkResponse({
-    type: Profile,
+    type: ProfileNullableResponseDto,
     description: 'Profile for current user',
     isArray: false,
   })
-  getProfile(@GetUser('sub') userId: string): Promise<Profile | null> {
+  async getProfile(
+    @GetUser('sub') userId: string,
+  ): Promise<ProfileNullableResponseDto> {
     if (!userId) {
       throw new UnauthorizedException('Invalid token payload');
     }
 
-    return this.profilesService.findByUserId(userId);
+    const profile = await this.profilesService.findByUserId(userId);
+
+    return {
+      message: 'Profile retrieved successfully',
+      data: profile,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('updateProfile')
   @ApiBody({ type: UpdateProfileDto })
-  @ApiOkResponse({ type: Profile, description: 'Updated profile' })
-  updateProfile(
+  @ApiOkResponse({
+    type: ProfileNullableResponseDto,
+    description: 'Updated profile',
+  })
+  async updateProfile(
     @GetUser('sub') userId: string,
     @Body() payload: UpdateProfileDto,
-  ): Promise<Profile | null> {
+  ): Promise<ProfileNullableResponseDto> {
     if (!userId) {
       throw new UnauthorizedException('Invalid token payload');
     }
 
-    return this.profilesService.update(userId, {
+    const profile = await this.profilesService.update(userId, {
       ...payload,
     });
+
+    return {
+      message: 'Profile updated successfully',
+      data: profile,
+    };
   }
 }

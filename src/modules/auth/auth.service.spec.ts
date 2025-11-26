@@ -90,7 +90,10 @@ describe('AuthService', () => {
       email: user.email,
       username: user.username,
     });
-    expect(result).toEqual({ accessToken: 'token' });
+    expect(result).toEqual({
+      message: 'Login successful',
+      data: { accessToken: 'token' },
+    });
   });
 
   it('login should throw unauthorized when user not found', async () => {

@@ -21,7 +21,7 @@ export class AuthController {
   @Post('login')
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ type: LoginResponseDto, description: 'JWT access token' })
-  login(@Body() payload: LoginDto): Promise<{ accessToken: string }> {
+  login(@Body() payload: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(payload);
   }
 }

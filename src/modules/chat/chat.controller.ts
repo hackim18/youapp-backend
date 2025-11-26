@@ -1,11 +1,12 @@
-﻿import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 import { ChatService } from './chat.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ViewMessagesDto } from './dto/view-messages.dto';
-import { Message } from './schemas/message.schema';
+import { ViewMessagesResponseDto } from './dto/view-messages-response.dto';
+import { SendMessageResponseDto } from './dto/send-message-response.dto';
 
 @ApiTags('Chat')
 @ApiBearerAuth()
@@ -16,22 +17,31 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   @Get('viewMessages')
   @ApiQuery({ name: 'userId', required: true })
-  @ApiOkResponse({ type: Message, isArray: true, description: 'Conversation messages' })
-  viewMessages(
+  @ApiOkResponse({
+    type: ViewMessagesResponseDto,
+    description: 'Conversation messages',
+  })
+  async viewMessages(
     @GetUser('sub') currentUserId: string,
     @Query() query: ViewMessagesDto,
-  ): Promise<Message[]> {
-    return this.chatService.getConversation(currentUserId, query.userId);
+  ): Promise<ViewMessagesResponseDto> {
+    const data = await this.chatService.getConversation(currentUserId, query.userId);
+    return { message: 'Messages retrieved successfully', data };
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('sendMessage')
   @ApiBody({ type: SendMessageDto })
-  @ApiOkResponse({ type: Message, description: 'Sent message' })
-  sendMessage(
+  @ApiOkResponse({ type: SendMessageResponseDto, description: 'Sent message' })
+  async sendMessage(
     @GetUser('sub') currentUserId: string,
     @Body() payload: SendMessageDto,
-  ): Promise<Message> {
-    return this.chatService.sendMessage(currentUserId, payload.receiverId, payload.content);
+  ): Promise<SendMessageResponseDto> {
+    const data = await this.chatService.sendMessage(
+      currentUserId,
+      payload.receiverId,
+      payload.content,
+    );
+    return { message: 'Message sent successfully', data };
   }
 }
