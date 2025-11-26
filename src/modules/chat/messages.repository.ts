@@ -10,11 +10,18 @@ export class MessagesRepository {
     private readonly messageModel: Model<MessageDocument>,
   ) {}
 
-  sendMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
+  sendMessage(
+    senderId: string,
+    receiverId: string,
+    content: string,
+  ): Promise<MessageDocument> {
     return this.messageModel.create({ senderId, receiverId, content });
   }
 
-  getConversation(userAId: string, userBId: string): Promise<Message[]> {
+  getConversation(
+    userAId: string,
+    userBId: string,
+  ): Promise<MessageDocument[]> {
     const filter: FilterQuery<Message> = {
       $or: [
         { senderId: userAId, receiverId: userBId },

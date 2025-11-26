@@ -2,17 +2,18 @@
 import { ChatService } from './chat.service';
 import { MessagesRepository } from './messages.repository';
 import { MessagingService } from '../../messaging/messaging.service';
-import { Message } from './schemas/message.schema';
+import { MessageDocument } from './schemas/message.schema';
 
-const messageFactory = (data?: Partial<Message>): Message => ({
-  id: 'msg-1',
-  senderId: 'sender',
-  receiverId: 'receiver',
-  content: 'hello',
-  createdAt: new Date('2020-01-01T00:00:00Z'),
-  seen: false,
-  ...data,
-});
+const messageFactory = (data?: Partial<MessageDocument>): MessageDocument =>
+  ({
+    id: 'msg-1',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    content: 'hello',
+    createdAt: new Date('2020-01-01T00:00:00Z'),
+    seen: false,
+    ...data,
+  } as unknown as MessageDocument);
 
 describe('ChatService', () => {
   let service: ChatService;

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MessagingService } from '../../messaging/messaging.service';
 import { MessageReceivedEvent } from './events/message-received.event';
 import { MessagesRepository } from './messages.repository';
-import { Message } from './schemas/message.schema';
+import { MessageDocument } from './schemas/message.schema';
 
 @Injectable()
 export class ChatService {
@@ -15,7 +15,7 @@ export class ChatService {
     senderId: string,
     receiverId: string,
     content: string,
-  ): Promise<Message> {
+  ): Promise<MessageDocument> {
     const message = await this.messagesRepository.sendMessage(
       senderId,
       receiverId,
@@ -35,7 +35,7 @@ export class ChatService {
     return message;
   }
 
-  getConversation(userAId: string, userBId: string): Promise<Message[]> {
+  getConversation(userAId: string, userBId: string): Promise<MessageDocument[]> {
     return this.messagesRepository.getConversation(userAId, userBId);
   }
 }
