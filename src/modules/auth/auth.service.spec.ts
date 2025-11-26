@@ -46,10 +46,11 @@ describe('AuthService', () => {
 
     const result = await service.register(dto);
 
-    expect(usersServiceMock.createUser).toHaveBeenCalledWith({
-      ...dto,
-      email: dto.email.toLowerCase(),
-    });
+    const createArgs = (usersServiceMock.createUser as jest.Mock).mock.calls[0][0];
+    expect(createArgs.email).toBe(dto.email.toLowerCase());
+    expect(createArgs.username).toBe(dto.username);
+    expect(typeof createArgs.password).toBe('string');
+    expect(createArgs.password).not.toBe(dto.password);
     const expected: RegisterResponseDto = {
       message: 'User registered successfully',
       data: { id: '1', email: dto.email.toLowerCase(), username: dto.username },
@@ -77,7 +78,10 @@ describe('AuthService', () => {
 
   it('login should return access token with payload', async () => {
     const dto: LoginDto = { emailOrUsername: 'user', password: 'pass123' };
-    const user = { id: '1', email: 'a@example.com', username: 'user', password: 'pass123' } as User;
+    const hashed = await (service as unknown as { hashPassword: (p: string) => Promise<string> }).hashPassword(
+      dto.password,
+    );
+    const user = { id: '1', email: 'a@example.com', username: 'user', password: hashed } as User;
     usersServiceMock.findByEmail = jest.fn().mockResolvedValue(null);
     usersServiceMock.findByUsername = jest.fn().mockResolvedValue(user);
     jwtServiceMock.sign = jest.fn().mockReturnValue('token');
@@ -107,7 +111,10 @@ describe('AuthService', () => {
 
   it('login should throw unauthorized when password mismatches', async () => {
     const dto: LoginDto = { emailOrUsername: 'user', password: 'wrong' };
-    const user = { id: '1', email: 'a@example.com', username: 'user', password: 'pass123' } as User;
+    const hashed = await (service as unknown as { hashPassword: (p: string) => Promise<string> }).hashPassword(
+      'pass123',
+    );
+    const user = { id: '1', email: 'a@example.com', username: 'user', password: hashed } as User;
     usersServiceMock.findByEmail = jest.fn().mockResolvedValue(null);
     usersServiceMock.findByUsername = jest.fn().mockResolvedValue(user);
 
