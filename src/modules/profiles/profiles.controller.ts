@@ -1,4 +1,12 @@
-﻿import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -26,6 +34,10 @@ export class ProfilesController {
     @GetUser('sub') userId: string,
     @Body() payload: CreateProfileDto,
   ): Promise<Profile> {
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
     return this.profilesService.create({
       ...payload,
       userId,
@@ -41,6 +53,10 @@ export class ProfilesController {
     isArray: false,
   })
   getProfile(@GetUser('sub') userId: string): Promise<Profile | null> {
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
     return this.profilesService.findByUserId(userId);
   }
 
@@ -52,6 +68,10 @@ export class ProfilesController {
     @GetUser('sub') userId: string,
     @Body() payload: UpdateProfileDto,
   ): Promise<Profile | null> {
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
     return this.profilesService.update(userId, {
       ...payload,
     });

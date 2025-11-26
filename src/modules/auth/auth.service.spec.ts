@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
@@ -46,10 +46,13 @@ describe('AuthService', () => {
 
     const result = await service.register(dto);
 
-    expect(usersServiceMock.createUser).toHaveBeenCalledWith(dto);
+    expect(usersServiceMock.createUser).toHaveBeenCalledWith({
+      ...dto,
+      email: dto.email.toLowerCase(),
+    });
     const expected: RegisterResponseDto = {
       message: 'User registered successfully',
-      data: { id: '1', email: dto.email, username: dto.username },
+      data: { id: '1', email: dto.email.toLowerCase(), username: dto.username },
     };
     expect(result).toEqual(expected);
   });
@@ -72,13 +75,40 @@ describe('AuthService', () => {
     expect(usersServiceMock.createUser).not.toHaveBeenCalled();
   });
 
-  it('login should return access token', async () => {
+  it('login should return access token with payload', async () => {
     const dto: LoginDto = { emailOrUsername: 'user', password: 'pass123' };
+    const user = { id: '1', email: 'a@example.com', username: 'user', password: 'pass123' } as User;
+    usersServiceMock.findByEmail = jest.fn().mockResolvedValue(null);
+    usersServiceMock.findByUsername = jest.fn().mockResolvedValue(user);
     jwtServiceMock.sign = jest.fn().mockReturnValue('token');
 
     const result = await service.login(dto);
 
-    expect(jwtServiceMock.sign).toHaveBeenCalled();
+    expect(usersServiceMock.findByUsername).toHaveBeenCalledWith(dto.emailOrUsername);
+    expect(jwtServiceMock.sign).toHaveBeenCalledWith({
+      sub: '1',
+      email: user.email,
+      username: user.username,
+    });
     expect(result).toEqual({ accessToken: 'token' });
+  });
+
+  it('login should throw unauthorized when user not found', async () => {
+    const dto: LoginDto = { emailOrUsername: 'missing', password: 'pass123' };
+    usersServiceMock.findByEmail = jest.fn().mockResolvedValue(null);
+    usersServiceMock.findByUsername = jest.fn().mockResolvedValue(null);
+
+    await expect(service.login(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(jwtServiceMock.sign).not.toHaveBeenCalled();
+  });
+
+  it('login should throw unauthorized when password mismatches', async () => {
+    const dto: LoginDto = { emailOrUsername: 'user', password: 'wrong' };
+    const user = { id: '1', email: 'a@example.com', username: 'user', password: 'pass123' } as User;
+    usersServiceMock.findByEmail = jest.fn().mockResolvedValue(null);
+    usersServiceMock.findByUsername = jest.fn().mockResolvedValue(user);
+
+    await expect(service.login(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(jwtServiceMock.sign).not.toHaveBeenCalled();
   });
 });
