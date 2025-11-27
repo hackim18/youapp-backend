@@ -14,4 +14,6 @@ export const validationSchema = Joi.object({
     .uri({ scheme: ['amqp', 'amqps'] })
     .default('amqp://localhost:5672'),
   RABBITMQ_QUEUE: Joi.string().default('youapp.messages'),
+  CORS_ORIGINS: Joi.string().default('*'),
+  CORS_CREDENTIALS: Joi.boolean().default(false),
 });

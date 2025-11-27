@@ -1,9 +1,10 @@
-﻿import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthRateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { RegisterDto } from './dto/register.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 
 @ApiTags('Auth')
@@ -44,6 +45,7 @@ export class AuthController {
       },
     },
   })
+  @UseGuards(AuthRateLimitGuard)
   @ApiOkResponse({ type: LoginResponseDto, description: 'JWT access token' })
   login(@Body() payload: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(payload);

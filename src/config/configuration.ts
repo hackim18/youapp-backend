@@ -14,4 +14,9 @@ export default registerAs('app', () => ({
     url: process.env.RABBITMQ_URL ?? 'amqp://localhost:5672',
     queue: process.env.RABBITMQ_QUEUE ?? 'youapp.messages',
   },
+  cors: {
+    origins:
+      process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean) ?? ['*'],
+    credentials: process.env.CORS_CREDENTIALS === 'true',
+  },
 }));
