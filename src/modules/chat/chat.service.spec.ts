@@ -20,6 +20,7 @@ describe('ChatService', () => {
   const repoMock = {
     sendMessage: jest.fn(),
     getConversation: jest.fn(),
+    markConversationAsSeen: jest.fn(),
   } as unknown as MessagesRepository;
 
   const messagingMock = {
@@ -53,5 +54,23 @@ describe('ChatService', () => {
       content: saved.content,
     }));
     expect(result).toEqual(saved);
+  });
+
+  it('getConversation returns messages and marks unseen as seen', async () => {
+    const now = new Date();
+    const msgs = [
+      messageFactory({ id: '1', senderId: 'other', receiverId: 'me', seen: false, createdAt: now }),
+      messageFactory({ id: '2', senderId: 'me', receiverId: 'other', seen: true }),
+    ];
+    repoMock.getConversation = jest.fn().mockResolvedValue(msgs as unknown as any);
+    repoMock.markConversationAsSeen = jest.fn().mockResolvedValue(undefined);
+
+    const result = await service.getConversation('me', 'other', { limit: 10 });
+
+    expect(repoMock.getConversation).toHaveBeenCalledWith('me', 'other', { limit: 10 });
+    expect(repoMock.markConversationAsSeen).toHaveBeenCalled();
+    const first = result[0] as any;
+    expect(first.seen).toBe(true);
+    expect(first.seenAt).toBeDefined();
   });
 });

@@ -16,7 +16,17 @@ export class ChatController {
 
   @UseGuards(JwtAuthGuard)
   @Get('viewMessages')
-  @ApiQuery({ name: 'userId', required: true })
+  @ApiQuery({ name: 'userId', required: true, description: 'Conversation partner user id' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Max messages to return (default 50, max 100)',
+  })
+  @ApiQuery({
+    name: 'before',
+    required: false,
+    description: 'ISO timestamp to fetch messages created before this time',
+  })
   @ApiOkResponse({
     type: ViewMessagesResponseDto,
     description: 'Conversation messages',
@@ -25,7 +35,10 @@ export class ChatController {
     @GetUser('sub') currentUserId: string,
     @Query() query: ViewMessagesDto,
   ): Promise<ViewMessagesResponseDto> {
-    const data = await this.chatService.getConversation(currentUserId, query.userId);
+    const data = await this.chatService.getConversation(currentUserId, query.userId, {
+      limit: query.limit,
+      before: query.before,
+    });
     return { message: 'Messages retrieved successfully', data };
   }
 

@@ -35,7 +35,24 @@ export class ChatService {
     return message;
   }
 
-  getConversation(userAId: string, userBId: string): Promise<MessageDocument[]> {
-    return this.messagesRepository.getConversation(userAId, userBId);
+  async getConversation(
+    userAId: string,
+    userBId: string,
+    options?: { before?: Date; limit?: number },
+  ): Promise<MessageDocument[]> {
+    const messages = await this.messagesRepository.getConversation(userAId, userBId, options);
+
+    const lastMessage = messages[messages.length - 1];
+    await this.messagesRepository.markConversationAsSeen(
+      userAId,
+      userBId,
+      lastMessage?.createdAt,
+    );
+
+    return messages.map((msg) =>
+      msg.receiverId.toString() === userAId.toString()
+        ? { ...msg.toObject?.() ?? msg, seen: true, seenAt: msg.seenAt ?? new Date() }
+        : msg,
+    ) as unknown as MessageDocument[];
   }
 }

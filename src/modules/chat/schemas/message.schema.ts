@@ -14,11 +14,20 @@ export class Message {
   @Prop({ required: true, trim: true })
   content!: string;
 
+  @Prop({ default: Date.now })
+  deliveredAt?: Date;
+
   @Prop({ default: false })
   seen!: boolean;
+
+  @Prop()
+  seenAt?: Date;
 
   @Prop()
   createdAt?: Date;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
+
+MessageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
+MessageSchema.index({ receiverId: 1, seen: 1, createdAt: -1 });
