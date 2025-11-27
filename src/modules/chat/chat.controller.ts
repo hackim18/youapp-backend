@@ -30,6 +30,26 @@ export class ChatController {
   @ApiOkResponse({
     type: ViewMessagesResponseDto,
     description: 'Conversation messages',
+    examples: {
+      default: {
+        summary: 'List conversation messages',
+        value: {
+          message: 'Messages retrieved successfully',
+          data: [
+            {
+              _id: '6761e8b741d4f9b35b3cd123',
+              senderId: '507f191e810c19729de860ea',
+              receiverId: '507f1f77bcf86cd799439011',
+              content: 'Hello!',
+              deliveredAt: '2025-11-26T08:20:00.000Z',
+              seen: true,
+              seenAt: '2025-11-26T08:21:00.000Z',
+              createdAt: '2025-11-26T08:19:59.000Z',
+            },
+          ],
+        },
+      },
+    },
   })
   async viewMessages(
     @GetUser('sub') currentUserId: string,
@@ -44,7 +64,15 @@ export class ChatController {
 
   @UseGuards(JwtAuthGuard)
   @Post('sendMessage')
-  @ApiBody({ type: SendMessageDto })
+  @ApiBody({
+    type: SendMessageDto,
+    examples: {
+      default: {
+        summary: 'Send a text message',
+        value: { receiverId: '507f191e810c19729de860ea', content: 'Hi there!' },
+      },
+    },
+  })
   @ApiOkResponse({ type: SendMessageResponseDto, description: 'Sent message' })
   async sendMessage(
     @GetUser('sub') currentUserId: string,

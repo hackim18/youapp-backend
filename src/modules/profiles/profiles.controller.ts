@@ -28,7 +28,23 @@ export class ProfilesController {
 
   @UseGuards(JwtAuthGuard)
   @Post('createProfile')
-  @ApiBody({ type: CreateProfileDto })
+  @ApiBody({
+    type: CreateProfileDto,
+    examples: {
+      default: {
+        summary: 'Create profile with full data',
+        value: {
+          displayName: 'Jane Doe',
+          gender: 'Female',
+          birthday: '1995-06-15',
+          height: 170,
+          weight: 60,
+          interests: ['music', 'travel'],
+          imageUrl: 'https://example.com/avatar.jpg',
+        },
+      },
+    },
+  })
   @ApiOkResponse({ type: ProfileResponseDto, description: 'Created profile' })
   async createProfile(
     @GetUser('sub') userId: string,
@@ -74,7 +90,19 @@ export class ProfilesController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('updateProfile')
-  @ApiBody({ type: UpdateProfileDto })
+  @ApiBody({
+    type: UpdateProfileDto,
+    examples: {
+      default: {
+        summary: 'Update partial profile',
+        value: {
+          displayName: 'Jane D',
+          zodiac: 'Gemini',
+          interests: ['music', 'travel', 'reading'],
+        },
+      },
+    },
+  })
   @ApiOkResponse({
     type: ProfileNullableResponseDto,
     description: 'Updated profile',
