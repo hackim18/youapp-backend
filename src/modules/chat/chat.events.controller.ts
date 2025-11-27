@@ -14,18 +14,21 @@ export class ChatEventsController {
     @Payload() event: MessageReceivedEvent,
     @Ctx() context: RmqContext,
   ): Promise<void> {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
     try {
-      await this.messagesRepository.markDelivered(
-        event.messageId,
-        event.timestamp,
-      );
+      await this.messagesRepository.markDelivered(event.messageId, event.timestamp);
       this.logger.log(
         `Delivered notification for message ${event.messageId} to receiver ${event.receiverId}`,
       );
     } finally {
-      const channel = context.getChannelRef();
-      const originalMessage = context.getMessage();
-      channel.ack(originalMessage);
+      try {
+        if (channel && originalMessage) {
+          channel.ack(originalMessage);
+        }
+      } catch (err) {
+        this.logger.error(`Ack failed for message ${event.messageId}`, err as Error);
+      }
     }
   }
 }

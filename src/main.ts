@@ -41,6 +41,8 @@ async function bootstrap() {
       urls: [configService.getOrThrow<string>('app.rabbitmq.url')],
       queue: configService.getOrThrow<string>('app.rabbitmq.queue'),
       queueOptions: { durable: true },
+      noAck: false,
+      prefetchCount: 1,
     },
   });
 
