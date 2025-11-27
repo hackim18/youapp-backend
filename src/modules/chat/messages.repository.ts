@@ -70,4 +70,17 @@ export class MessagesRepository {
       .updateMany(filter, { $set: { seen: true, seenAt: new Date() } })
       .exec();
   }
+
+  async markDelivered(messageId: string, deliveredAt?: Date): Promise<void> {
+    await this.messageModel
+      .updateOne(
+        { _id: messageId },
+        {
+          $set: {
+            deliveredAt: deliveredAt ?? new Date(),
+          },
+        },
+      )
+      .exec();
+  }
 }

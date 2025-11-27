@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessagingModule } from '../../messaging/messaging.module';
 import { ChatController } from './chat.controller';
+import { ChatEventsController } from './chat.events.controller';
 import { ChatService } from './chat.service';
 import { MessagesRepository } from './messages.repository';
 import { Message, MessageSchema } from './schemas/message.schema';
@@ -11,7 +12,7 @@ import { Message, MessageSchema } from './schemas/message.schema';
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
     MessagingModule,
   ],
-  controllers: [ChatController],
+  controllers: [ChatController, ChatEventsController],
   providers: [ChatService, MessagesRepository],
   exports: [ChatService, MessagesRepository],
 })
